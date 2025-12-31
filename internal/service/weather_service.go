@@ -6,18 +6,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/xoltawn/weatherhub/internal/domain"
-	"github.com/xoltawn/weatherhub/pkg/weatherapi"
 )
 
 type weatherService struct {
-	repo       domain.WeatherRepository
-	weatherAPI *weatherapi.Client
+	repo domain.WeatherRepository
 }
 
-func NewWeatherService(repo domain.WeatherRepository, api *weatherapi.Client) domain.WeatherService {
+func NewWeatherService(repo domain.WeatherRepository) domain.WeatherService {
 	return &weatherService{
-		repo:       repo,
-		weatherAPI: api,
+		repo: repo,
 	}
 }
 
