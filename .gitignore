@@ -1,0 +1,9 @@
+# Binaries
+bin/
+main
+
+# Env files
+.env
+
+# Dependencies
+vendor/
