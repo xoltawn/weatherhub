@@ -1,0 +1,217 @@
+basePath: /api/v1
+definitions:
+  domain.Weather:
+    properties:
+      city_name:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      fetched_at:
+        type: string
+      humidity:
+        type: integer
+      id:
+        type: string
+      temperature:
+        type: number
+      updated_at:
+        type: string
+      wind_speed:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: This is a weather data server.
+  title: WeatherHub API
+  version: "1.0"
+paths:
+  /weather:
+    get:
+      description: Retrieve every weather record currently stored in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Weather'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all weather records
+      tags:
+      - weather
+    post:
+      consumes:
+      - application/json
+      description: Calls OpenWeatherMap API for a city/country and saves the result
+        to the database
+      parameters:
+      - description: City and Country codes
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            cityName:
+              type: string
+            country:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Weather'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Fetch and store weather
+      tags:
+      - weather
+  /weather/{id}:
+    delete:
+      description: Remove a weather record from the database by ID
+      parameters:
+      - description: Weather UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a weather record
+      tags:
+      - weather
+    get:
+      description: Retrieve a specific weather record using its UUID
+      parameters:
+      - description: Weather UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Weather'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get weather by ID
+      tags:
+      - weather
+    put:
+      consumes:
+      - application/json
+      description: Modify fields of an existing weather record by ID
+      parameters:
+      - description: Weather UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: updates
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Weather'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Weather'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a weather record
+      tags:
+      - weather
+  /weather/latest/{cityName}:
+    get:
+      description: Retrieve the most recently fetched weather record for a specific
+        city
+      parameters:
+      - description: City Name
+        in: path
+        name: cityName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Weather'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get latest city weather
+      tags:
+      - weather
+swagger: "2.0"

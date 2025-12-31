@@ -11,12 +11,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/xoltawn/weatherhub/docs"
 	"github.com/xoltawn/weatherhub/internal/api/handler"
 	"github.com/xoltawn/weatherhub/internal/repository"
 	weatherrepository "github.com/xoltawn/weatherhub/internal/repository/weather"
 	"github.com/xoltawn/weatherhub/internal/service"
 )
 
+// @title WeatherHub API
+// @version 1.0
+// @description This is a weather data server.
+// @BasePath /api/v1
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
@@ -32,6 +39,7 @@ func main() {
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
+	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	weatherHandler := handler.NewWeatherHandler(weatherService)
 	weatherHandler.RegisterRoutes(api)

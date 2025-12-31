@@ -1,4 +1,5 @@
 run:
+	swag init -g cmd/server/main.go
 	go run cmd/server/main.go
 
 build:
@@ -9,3 +10,8 @@ test:
 
 tidy:
 	go mod tidy
+
+swag:
+	swag init -g cmd/server/main.go
+
+.PHONY: run build test tidy swag
