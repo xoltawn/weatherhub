@@ -54,7 +54,7 @@ func (h *WeatherHandler) Create(c *gin.Context) {
 
 	result, err := h.service.FetchAndStore(c.Request.Context(), input.CityName, input.Country, input.Units)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		RespondWithError(c, err)
 		return
 	}
 
@@ -73,9 +73,10 @@ func (h *WeatherHandler) Create(c *gin.Context) {
 func (h *WeatherHandler) GetAll(c *gin.Context) {
 	weathers, err := h.service.GetAllRecords(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		RespondWithError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, weathers)
 }
 
@@ -92,6 +93,7 @@ func (h *WeatherHandler) GetAll(c *gin.Context) {
 // @Router       /weather/{id} [get]
 func (h *WeatherHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
+
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
@@ -100,9 +102,10 @@ func (h *WeatherHandler) GetByID(c *gin.Context) {
 
 	weather, err := h.service.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
+		RespondWithError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, weather)
 }
 
@@ -120,6 +123,7 @@ func (h *WeatherHandler) GetByID(c *gin.Context) {
 // @Router       /weather/{id} [put]
 func (h *WeatherHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
+
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
@@ -134,9 +138,10 @@ func (h *WeatherHandler) Update(c *gin.Context) {
 
 	result, err := h.service.UpdateRecord(c.Request.Context(), id, &updates)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		RespondWithError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, result)
 }
 
@@ -158,9 +163,10 @@ func (h *WeatherHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteRecord(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		RespondWithError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully deleted"})
 }
 
@@ -176,10 +182,12 @@ func (h *WeatherHandler) Delete(c *gin.Context) {
 // @Router       /weather/latest/{cityName} [get]
 func (h *WeatherHandler) GetLatest(c *gin.Context) {
 	cityName := c.Param("cityName")
+
 	result, err := h.service.GetLatest(c.Request.Context(), cityName)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No records found for this city"})
+		RespondWithError(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, result)
 }

@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/xoltawn/weatherhub/internal/domain"
+	"github.com/xoltawn/weatherhub/pkg/errutil"
 )
 
 type openWeatherProvider struct {
@@ -74,17 +75,17 @@ func (p *openWeatherProvider) GetForecast(ctx context.Context, city, country str
 
 	resp, err := http.Get(fullURL)
 	if err != nil {
-		return nil, err
+		return nil, errutil.Wrap(domain.ErrThirdParty, err.Error())
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: status %d", resp.StatusCode)
+		return nil, errutil.Wrap(domain.ErrThirdParty, fmt.Errorf("API error: status %d", resp.StatusCode).Error())
 	}
 
 	var raw OWMResponse
 	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
-		return nil, err
+		return nil, errutil.Wrap(domain.ErrThirdParty, err.Error())
 	}
 
 	return &domain.WeatherData{

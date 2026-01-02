@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/xoltawn/weatherhub/internal/domain"
+	"github.com/xoltawn/weatherhub/pkg/errutil"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,15 +15,13 @@ import (
 
 // InitDB initializes the Postgres connection and runs migrations
 func InitDB(dsn string) (*gorm.DB, error) {
-	// 1. Open Connection
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info), // Logs SQL queries for debugging
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// 2. Configure Connection Pool
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, err
@@ -38,7 +38,6 @@ func InitDB(dsn string) (*gorm.DB, error) {
 	log.Println("Running database migrations...")
 	err = db.AutoMigrate(
 		&domain.Weather{},
-		// Add other domain entities here (e.g., &domain.User{})
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
@@ -46,4 +45,22 @@ func InitDB(dsn string) (*gorm.DB, error) {
 
 	log.Println("Database migration completed successfully")
 	return db, nil
+}
+
+func MapGormError(err error, context string) error {
+	if err == nil {
+		return nil
+	}
+
+	var finalErr error
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		finalErr = domain.ErrNotFound
+	case errors.Is(err, gorm.ErrDuplicatedKey):
+		finalErr = domain.ErrAlreadyExists
+	default:
+		finalErr = domain.ErrInternal
+	}
+
+	return errutil.Wrap(finalErr, context)
 }
