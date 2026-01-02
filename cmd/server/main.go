@@ -18,6 +18,7 @@ import (
 	"github.com/xoltawn/weatherhub/internal/repository"
 	weatherrepository "github.com/xoltawn/weatherhub/internal/repository/weather"
 	"github.com/xoltawn/weatherhub/internal/service"
+	"github.com/xoltawn/weatherhub/pkg/openweathermap"
 )
 
 // @title WeatherHub API
@@ -34,8 +35,12 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	owmCli := openweathermap.NewOpenWeatherProvider(
+		os.Getenv("OPEN_WEATHER_MAP_API_KEY"),
+		os.Getenv("OPEN_WEATHER_MAP_BASE_URL"))
+
 	weatherRepo := weatherrepository.New(db)
-	weatherService := service.NewWeatherService(weatherRepo)
+	weatherService := service.NewWeatherService(weatherRepo, owmCli)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")

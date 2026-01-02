@@ -82,6 +82,9 @@ const docTemplate = `{
                                 },
                                 "country": {
                                     "type": "string"
+                                },
+                                "units": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -306,6 +309,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.Unit": {
+            "type": "string",
+            "enum": [
+                "metric",
+                "imperial"
+            ],
+            "x-enum-varnames": [
+                "Metric",
+                "Imperial"
+            ]
+        },
         "domain.Weather": {
             "type": "object",
             "properties": {
@@ -332,6 +346,9 @@ const docTemplate = `{
                 },
                 "temperature": {
                     "type": "number"
+                },
+                "unit": {
+                    "$ref": "#/definitions/domain.Unit"
                 },
                 "updated_at": {
                     "type": "string"

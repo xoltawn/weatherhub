@@ -9,27 +9,33 @@ import (
 )
 
 type weatherService struct {
-	repo domain.WeatherRepository
+	repo            domain.WeatherRepository
+	weatherProvider domain.WeatherProvider
 }
 
-func NewWeatherService(repo domain.WeatherRepository) domain.WeatherService {
+func NewWeatherService(repo domain.WeatherRepository, weatherProvider domain.WeatherProvider) domain.WeatherService {
 	return &weatherService{
-		repo: repo,
+		repo:            repo,
+		weatherProvider: weatherProvider,
 	}
 }
 
-func (s *weatherService) FetchAndStore(ctx context.Context, cityName, country string) (*domain.Weather, error) {
-	// TODO: fetch data from openweathermap
+func (s *weatherService) FetchAndStore(ctx context.Context, cityName, country string, units domain.Unit) (*domain.Weather, error) {
+	weatherApiResp, err := s.weatherProvider.GetForecast(ctx, cityName, country, units)
+	if err != nil {
+		return nil, err
+	}
 
 	weather := &domain.Weather{
 		ID:          uuid.New(),
 		CityName:    cityName,
 		Country:     country,
-		Temperature: 0,  //TODO
+		Temperature: weatherApiResp.Temperature,
 		Description: "", //TODO
-		Humidity:    0,  //TODO
-		WindSpeed:   0,  //TODO
+		Humidity:    weatherApiResp.Humidity,
+		WindSpeed:   weatherApiResp.WindSpeed,
 		FetchedAt:   time.Now(),
+		Unit:        units,
 	}
 
 	if err := s.repo.Create(ctx, weather); err != nil {

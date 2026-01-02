@@ -34,7 +34,7 @@ func (h *WeatherHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // @Tags         weather
 // @Accept       json
 // @Produce      json
-// @Param        request  body      object{cityName=string,country=string}  true  "City and Country codes"
+// @Param        request  body      object{cityName=string,country=string,units=string}  true  "City and Country codes"
 // @Success      201      {object}  domain.Weather
 // @Failure      400      {object}  map[string]string
 // @Failure      500      {object}  map[string]string
@@ -42,8 +42,9 @@ func (h *WeatherHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // @Router       /weather [post]
 func (h *WeatherHandler) Create(c *gin.Context) {
 	var input struct {
-		CityName string `json:"cityName" binding:"required"`
-		Country  string `json:"country" binding:"required"`
+		CityName string      `json:"cityName" binding:"required,min=2,max=50"`
+		Country  string      `json:"country"  binding:"required,iso3166_1_alpha2"`
+		Units    domain.Unit `json:"units"    binding:"required,oneof=metric imperial"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -51,7 +52,7 @@ func (h *WeatherHandler) Create(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.FetchAndStore(c.Request.Context(), input.CityName, input.Country)
+	result, err := h.service.FetchAndStore(c.Request.Context(), input.CityName, input.Country, input.Units)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
