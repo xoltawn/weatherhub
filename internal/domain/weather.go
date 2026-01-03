@@ -28,6 +28,7 @@ type Weather struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+//go:generate mockery --name=WeatherRepository --output=../repository/mocks --case=underscore
 type WeatherRepository interface {
 	Create(ctx context.Context, weather *Weather) error
 	GetAll(ctx context.Context) ([]Weather, error)

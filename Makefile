@@ -28,5 +28,15 @@ down:
 config:
 	cp .env.example .env
 
+generate:
+	go generate ./...
+
+test:
+	go test -v ./...
+
+install-tools:
+	@echo "Installing dev tools..."
+	go install github.com/vektra/mockery/v2@latest
+	go install github.com/swaggo/swag/cmd/swag@latest
 
 .PHONY: run build test tidy swag up down
