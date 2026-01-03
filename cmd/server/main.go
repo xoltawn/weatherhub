@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/xoltawn/weatherhub/docs"
@@ -42,8 +44,29 @@ func main() {
 		validator.New(),
 	)
 
+	cacheTTL, cacheErr := time.ParseDuration(os.Getenv("CACHE_TTL"))
+	if cacheErr != nil {
+		log.Println("Using default ttl for cache of 1 hour")
+		cacheTTL = time.Hour
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,  // use default DB
+		PoolSize: 10, // connection pool size
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if _, err := rdb.Ping(ctx).Result(); err != nil {
+		log.Fatalf("Failed to connect to redis: %v", err)
+	}
+
 	weatherRepo := weatherrepository.New(db)
-	weatherService := service.NewWeatherService(weatherRepo, owmCli)
+	cachedWeatherRepo := weatherrepository.NewCachedWeatherRepo(weatherRepo, rdb, cacheTTL)
+	weatherService := service.NewWeatherService(cachedWeatherRepo, owmCli)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -68,7 +91,7 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {

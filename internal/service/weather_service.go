@@ -22,7 +22,10 @@ func NewWeatherService(repo domain.WeatherRepository, weatherProvider domain.Wea
 }
 
 func (s *weatherService) FetchAndStore(ctx context.Context, cityName, country string, units domain.Unit) (*domain.Weather, error) {
-	weatherApiResp, err := s.weatherProvider.GetForecast(ctx, strings.ToLower(cityName), strings.ToLower(country), units)
+	cityName = strings.ToLower(cityName)
+	country = strings.ToLower(country)
+
+	weatherApiResp, err := s.weatherProvider.GetForecast(ctx, cityName, country, units)
 	if err != nil {
 		return nil, err
 	}
