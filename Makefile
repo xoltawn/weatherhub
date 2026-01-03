@@ -17,14 +17,16 @@ swag:
 	swag init -g cmd/server/main.go
 
 
-# Standard startup
 up:
 	@echo "Starting containers..."
 	$(DOCKER_COMPOSE) up -d
 
-# Shutdown
 down:
 	@echo "Stopping containers..."
 	$(DOCKER_COMPOSE) down
+
+config:
+	cp .env.example .env
+
 
 .PHONY: run build test tidy swag up down
