@@ -16,8 +16,8 @@ const (
 
 type Weather struct {
 	ID          uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
-	CityName    string    `json:"city_name"`
-	Country     string    `json:"country"`
+	CityName    string    `json:"city_name" gorm:"index;index:idx_city_country"`
+	Country     string    `json:"country" gorm:"index:idx_city_country"`
 	Temperature float64   `json:"temperature"`
 	Unit        Unit      `json:"unit"`
 	Description string    `json:"description"`

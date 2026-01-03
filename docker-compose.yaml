@@ -3,7 +3,7 @@ services:
     build: .
     container_name: weather_hub_api
     environment:
-      - PORT=8080
+      - PORT=${PORT}
       - DB_URL=postgres://user:pass@db:5432/weatherhub?sslmode=disable
       - JWT_SECRET=${JWT_SECRET}
       - OPEN_WEATHER_MAP_API_KEY=${OPEN_WEATHER_MAP_API_KEY}

@@ -20,7 +20,8 @@ swag:
 up:
 	@echo "Starting containers..."
 	$(DOCKER_COMPOSE) up -d
-
+	docker logs weather_hub_api  -f
+	
 down:
 	@echo "Stopping containers..."
 	$(DOCKER_COMPOSE) down
@@ -30,9 +31,6 @@ config:
 
 generate:
 	go generate ./...
-
-test:
-	go test -v ./...
 
 install-tools:
 	@echo "Installing dev tools..."

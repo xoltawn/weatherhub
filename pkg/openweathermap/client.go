@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -78,24 +79,33 @@ func (p *openWeatherProvider) GetForecast(ctx context.Context, city, country str
 
 	resp, err := http.Get(fullURL)
 	if err != nil {
+		log.Println(err)
+
 		return nil, errutil.Wrap(domain.ErrThirdParty, err.Error())
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errutil.Wrap(domain.ErrThirdParty, fmt.Errorf("API error: status %d", resp.StatusCode).Error())
+		err := fmt.Errorf("API error: status %d", resp.StatusCode)
+
+		log.Println(err)
+
+		return nil, errutil.Wrap(domain.ErrThirdParty, err.Error())
 	}
 
 	var raw OWMResponse
 	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		log.Println(err)
+
 		return nil, errutil.Wrap(domain.ErrThirdParty, err.Error())
 	}
 
 	if err := p.validator.Struct(raw); err != nil {
+		log.Println(err)
+
 		return nil, errutil.Wrap(domain.ErrThirdParty, "weatherapi: provider returned invalid schema")
 	}
 
-	fmt.Println(raw.Weather[0].Description)
 	return &domain.WeatherData{
 		Temperature: raw.Main.Temp,
 		Humidity:    raw.Main.Humidity,

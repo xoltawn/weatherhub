@@ -69,6 +69,8 @@ The API is fully documented using Swagger annotations. You can interact with the
 | `GET` | `/weather` | List all stored records |
 | `PUT` | `/weather/:id` | Update an existing record |
 | `DELETE` | `/weather/:id` | Remove a record and invalidate cache |
+| `GET` | `/api/v1/swagger/index.html` | Swagger |
+
 
 ---
 
