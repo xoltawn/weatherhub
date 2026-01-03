@@ -48,7 +48,7 @@ func (h *WeatherHandler) Create(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		RespondWithError(c, err)
 		return
 	}
 
@@ -96,7 +96,7 @@ func (h *WeatherHandler) GetByID(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		RespondWithError(c, domain.ErrInvalidInput)
 		return
 	}
 
@@ -126,13 +126,13 @@ func (h *WeatherHandler) Update(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		RespondWithError(c, domain.ErrInvalidInput)
 		return
 	}
 
 	var updates domain.Weather
 	if err := c.ShouldBindJSON(&updates); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		RespondWithError(c, err)
 		return
 	}
 
@@ -158,7 +158,7 @@ func (h *WeatherHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		RespondWithError(c, domain.ErrInvalidInput)
 		return
 	}
 

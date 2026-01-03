@@ -1,2 +1,3 @@
 - The similar city names problem (we can have cities table)
 - we can have a background job to fetch data
+- unit system management (user can set their unit)
