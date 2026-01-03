@@ -1,0 +1,53 @@
+services:
+  app:
+    build: .
+    container_name: weather_hub_api
+    environment:
+      - PORT=8080
+      - DB_URL=postgres://user:pass@db:5432/weatherhub?sslmode=disable
+      - JWT_SECRET=${JWT_SECRET}
+      - OPEN_WEATHER_MAP_API_KEY=${OPEN_WEATHER_MAP_API_KEY}
+      - OPEN_WEATHER_MAP_BASE_URL=https://api.openweathermap.org/data/2.5/weather
+      - CACHE_TTL=4h
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - weather_net
+
+  db:
+    image: postgres:16-alpine
+    container_name: weather_db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=weatherhub
+    networks:
+      - weather_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d weatherhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: weather_redis
+    networks:
+      - weather_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  weather_net:
+    driver: bridge
