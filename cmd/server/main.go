@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -37,7 +38,9 @@ func main() {
 
 	owmCli := openweathermap.NewOpenWeatherProvider(
 		os.Getenv("OPEN_WEATHER_MAP_API_KEY"),
-		os.Getenv("OPEN_WEATHER_MAP_BASE_URL"))
+		os.Getenv("OPEN_WEATHER_MAP_BASE_URL"),
+		validator.New(),
+	)
 
 	weatherRepo := weatherrepository.New(db)
 	weatherService := service.NewWeatherService(weatherRepo, owmCli)

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +22,7 @@ func NewWeatherService(repo domain.WeatherRepository, weatherProvider domain.Wea
 }
 
 func (s *weatherService) FetchAndStore(ctx context.Context, cityName, country string, units domain.Unit) (*domain.Weather, error) {
-	weatherApiResp, err := s.weatherProvider.GetForecast(ctx, cityName, country, units)
+	weatherApiResp, err := s.weatherProvider.GetForecast(ctx, strings.ToLower(cityName), strings.ToLower(country), units)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func (s *weatherService) FetchAndStore(ctx context.Context, cityName, country st
 		CityName:    cityName,
 		Country:     country,
 		Temperature: weatherApiResp.Temperature,
-		Description: "", //TODO
+		Description: weatherApiResp.Description,
 		Humidity:    weatherApiResp.Humidity,
 		WindSpeed:   weatherApiResp.WindSpeed,
 		FetchedAt:   time.Now(),
@@ -77,5 +78,5 @@ func (s *weatherService) DeleteRecord(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *weatherService) GetLatest(ctx context.Context, cityName string) (*domain.Weather, error) {
-	return s.repo.GetLatestByCity(ctx, cityName)
+	return s.repo.GetLatestByCity(ctx, strings.ToLower(cityName))
 }
