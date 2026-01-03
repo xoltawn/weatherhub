@@ -1,19 +1,29 @@
 # WeatherHub API
 
-A Go API built with **Clean Architecture**, featuring real-time weather data fetching, PostgreSQL persistence, and high-performance Redis caching.
+A Go API built with **Clean Architecture** (Onion Architecture), featuring real-time weather data fetching, PostgreSQL persistence, and high-performance Redis caching.
 
 ---
 
 ## 🏗️ Project Architecture
 
-This project is built using the **Onion Architecture** (Clean Architecture) pattern. This ensures that the business logic remains independent of frameworks, databases, and external APIs.
-
-
+The project decouples business logic from external dependencies (frameworks, DBs, APIs), allowing for high testability and maintainability.
 
 ### Key Design Patterns
 * **Proxy Pattern (Caching):** A `CachedWeatherRepo` wraps the database repository. It intercepts read calls to check **Redis** for a "hit" before falling back to **Postgres**. This keeps caching logic out of the business layer.
 * **Strategy Pattern:** External weather providers are abstracted via interfaces. Swapping **OpenWeatherMap** for another provider requires zero changes to the core logic.
 * **Centralized Error Handling:** A unified `RespondWithError` helper maps domain errors and `go-playground` validation errors to standardized JSON responses.
+
+
+
+---
+
+## 🛠️ Tech Stack
+* **Language:** Go (Golang)
+* **Framework:** Gin Gonic (HTTP)
+* **Database:** PostgreSQL
+* **Caching:** Redis
+* **Documentation:** Swagger (swaggo)
+* **Containerization:** Docker & Docker Compose
 
 ---
 
@@ -23,37 +33,56 @@ This project is built using the **Onion Architecture** (Clean Architecture) patt
 * [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
 * [Make](https://www.gnu.org/software/make/)
 
-### 2. Environment Setup
+### 2. Setup & Execution
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/xoltawn/weatherhub
+    git clone [https://github.com/xoltawn/weatherhub](https://github.com/xoltawn/weatherhub)
     cd weatherhub
     ```
-2.  **Create your `.env` file:**
+2.  **Initialize Configuration:**
     ```bash
-    cp .env.example .env
+    make config
     ```
 3.  **Configure API Key:**
-    Open `.env` and paste your `OPEN_WEATHER_MAP_API_KEY`.
+    Open the generated `.env` file and paste your `OPEN_WEATHER_MAP_API_KEY`.
 
-### 3. Running the App
-The `Makefile` automates the Docker lifecycle:
-```bash
-# copy config file
-make config
+4.  **Run the Application:**
+    ```bash
+    make up
+    ```
+    The API will be available at `http://localhost:8080`.
 
-# run in container
-make up
+---
 
-# shutdown container
-make down
-```
+## 📖 API Documentation
 
-### Project Roadmap & Enhancements
-[x] Multi-Unit Support: Integrated localized measurement systems (Metric/Imperial) supporting internationalized weather data standards.
+The API is fully documented using Swagger annotations. You can interact with the endpoints directly through the UI.
 
-[ ] Entity Normalization (Cities): Implement a dedicated cities schema and search API. This mitigates namespace collisions (ambiguous city names) and improves data integrity by using unique identifiers (e.g., OpenWeather City IDs or Geo-coordinates).
+* **Swagger UI:** `http://localhost:8080/swagger/index.html`
 
-[ ] Optimized Cache Serialization: Transition from standard JSON to a binary serialization format (e.g., Protobuf or MessagePack) to reduce Redis memory footprint and improve I/O throughput.
+### Primary Endpoints
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/weather` | Fetch from OpenWeather & Store in DB |
+| `GET` | `/weather/:id` | Get specific record by UUID |
+| `GET` | `/weather/latest/:city` | Get the most recent fetch for a city |
+| `GET` | `/weather` | List all stored records |
+| `PUT` | `/weather/:id` | Update an existing record |
+| `DELETE` | `/weather/:id` | Remove a record and invalidate cache |
 
-- [ ] Reading data from cache needs cleaner approach to save Redis storage 
+---
+
+## 📝 Project Roadmap & Enhancements
+
+- [x] **Multi-Unit Support:** Integrated localized measurement systems (Metric/Imperial).
+- [ ] **Auth (JWT):** Secure endpoints with JSON Web Tokens and Middleware.
+- [ ] **Entity Normalization (Cities):** Dedicated `cities` schema to mitigate name collisions and improve search.
+- [ ] **Optimized Cache Serialization:** Transition from JSON to **Protobuf** or **MessagePack** to reduce Redis memory footprint.
+- [ ] **Advanced Caching:** Implement a cleaner "Cache-Aside" or "Write-Through" strategy to optimize Redis storage.
+
+---
+
+## 🧹 Maintenance
+* **Stop Services:** `make down`
+* **Check Logs:** `docker-compose logs -f app`
+* **Generate Mocks:** `go generate ./...`
