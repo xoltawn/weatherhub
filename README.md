@@ -26,7 +26,7 @@ This project is built using the **Onion Architecture** (Clean Architecture) patt
 ### 2. Environment Setup
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/xoltawn/weatherhub.git](https://github.com/xoltawn/weatherhub.git)
+    git clone https://github.com/xoltawn/weatherhub
     cd weatherhub
     ```
 2.  **Create your `.env` file:**
@@ -39,15 +39,21 @@ This project is built using the **Onion Architecture** (Clean Architecture) patt
 ### 3. Running the App
 The `Makefile` automates the Docker lifecycle:
 ```bash
-# copt config file
+# copy config file
 make config
+
+# run in container
 make up
 
-#shutdown
+# shutdown container
 make down
 ```
 
-### Todos
-- [x] Add basic unit system (metric. imperial )
-- [ ] A table and api for `cities` to provider search city functionality and mitigate same city name problem
-- [ ] Reading data from cache needs cleaner approach to save Redis storage
+### Project Roadmap & Enhancements
+[x] Multi-Unit Support: Integrated localized measurement systems (Metric/Imperial) supporting internationalized weather data standards.
+
+[ ] Entity Normalization (Cities): Implement a dedicated cities schema and search API. This mitigates namespace collisions (ambiguous city names) and improves data integrity by using unique identifiers (e.g., OpenWeather City IDs or Geo-coordinates).
+
+[ ] Optimized Cache Serialization: Transition from standard JSON to a binary serialization format (e.g., Protobuf or MessagePack) to reduce Redis memory footprint and improve I/O throughput.
+
+- [ ] Reading data from cache needs cleaner approach to save Redis storage 
